@@ -22,6 +22,9 @@ async function main() {
     console.log("\n=== ANALYST OUTPUT ===\n");
     console.log(JSON.stringify(result.analysis, null, 2));
 
+    console.log("\n=== SOLUTION OUTPUT ===\n");
+    console.log(JSON.stringify(result.solution, null, 2));
+
     console.log("\nLangGraph workflow completed successfully.");
   } catch (error) {
     console.error("\nAgentFlow AI failed:");
