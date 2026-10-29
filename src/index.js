@@ -1,5 +1,4 @@
-import { plannerAgent } from "./agents/planner.js";
-import { analystAgent } from "./agents/analyst.js";
+import { agentFlow } from "./graph/workflow.js";
 
 const problem = `
 My React application becomes slow when rendering
@@ -15,17 +14,15 @@ async function main() {
     console.log("\nEngineering problem:");
     console.log(problem);
 
-    console.log("\n=== 1. Planner Agent ===");
-    const plan = await plannerAgent(problem);
+    const result = await agentFlow.invoke({ problem });
 
-    console.log(JSON.stringify(plan, null, 2));
+    console.log("\n=== PLANNER OUTPUT ===\n");
+    console.log(JSON.stringify(result.plan, null, 2));
 
-    console.log("\n=== 2. Analyst Agent ===");
-    const analysis = await analystAgent(problem, plan);
+    console.log("\n=== ANALYST OUTPUT ===\n");
+    console.log(JSON.stringify(result.analysis, null, 2));
 
-    console.log(JSON.stringify(analysis, null, 2));
-
-    console.log("\nBoth agents completed successfully.");
+    console.log("\nLangGraph workflow completed successfully.");
   } catch (error) {
     console.error("\nAgentFlow AI failed:");
     console.error(error.message);
