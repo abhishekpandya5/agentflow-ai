@@ -4,7 +4,8 @@ export const AgentFlowState = Annotation.Root({
   problem: Annotation(),
   plan: Annotation(),
   analysis: Annotation(),
-  solution: Annotation()
+  solution: Annotation(),
+  review: Annotation(),
 });
 
 /**  

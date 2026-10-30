@@ -4,6 +4,7 @@ import { AgentFlowState } from "./state.js";
 import { plannerAgent } from "../agents/planner.js";
 import { analystAgent } from "../agents/analyst.js";
 import { solutionAgent } from "../agents/solution.js";
+import { reviewerAgent } from "../agents/reviewer.js";
 
 async function plannerNode(state) {
   console.log("\n[Graph] Running Planner Node...");
@@ -33,12 +34,27 @@ async function solutionNode(state) {
   return { solution };
 }
 
+async function reviewerNode(state) {
+  console.log("\n[Graph] Running Reviewer Node...");
+
+  const review = await reviewerAgent(
+    state.problem,
+    state.plan,
+    state.analysis,
+    state.solution
+  );
+
+  return { review };
+}
+
 export const agentFlow = new StateGraph(AgentFlowState)
   .addNode("planner", plannerNode)
   .addNode("analyst", analystNode)
-  .addNode("solutionNode", solutionNode)
+  .addNode("solution_node", solutionNode)
+  .addNode("reviewer_node", reviewerNode)
   .addEdge(START, "planner")
   .addEdge("planner", "analyst")
-  .addEdge("analyst", "solutionNode")
-  .addEdge("solutionNode", END)
+  .addEdge("analyst", "solution_node")
+  .addEdge("solution_node", "reviewer_node")
+  .addEdge("reviewer_node", END)
   .compile();
