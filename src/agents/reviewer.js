@@ -2,7 +2,8 @@ import { z } from "zod";
 import { model } from "../config/model.js";
 
 const ReviewSchema = z.object({
-  approved: z.boolean(),
+  // approved: z.boolean(),
+  decision: z.enum(["approved", "revise", "needs_input"]),
   overallAssessment: z.string(),
   issues: z.array(z.string()),
   requiredImprovements: z.array(z.string()),
@@ -58,16 +59,33 @@ Important rules:
 - Treat suspected causes as hypotheses, not established facts.
 - Do not approve a solution merely because it is well formatted.
 - Identify specific, actionable issues.
-- Set approved to true only when the solution is sufficiently sound.
-- If improvements are required, set approved to false.
-- If approved is true, issues and requiredImprovements should be empty arrays.
+- Use the decision field according to the decision rules below.
+- For approved, issues and requiredImprovements should be empty arrays.
+- For revise, provide specific issues and actionable improvements.
+- For needs_input, explain what essential information is missing.
 - Do not claim that code was executed or performance was measured.
 - Return valid JSON only, without Markdown fences.
 - Keep the response concise.
 
+Decision rules:
+
+1. approved:
+   The solution is sufficiently correct and actionable.
+
+2. revise:
+   The solution has identifiable problems that can be
+   addressed using the information already available.
+
+3. needs_input:
+   Essential information is missing and cannot be
+   reasonably inferred from the supplied context.
+
+Do not reject a solution merely because additional
+information could make it more precise.
+
 Return this structure:
 {
-  "approved": false,
+  "decision": "approved" | "revise" | "needs_input",
   "overallAssessment": "Summary of the review",
   "issues": ["Specific issue"],
   "requiredImprovements": ["Actionable improvement"],

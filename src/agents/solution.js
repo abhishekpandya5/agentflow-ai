@@ -9,7 +9,13 @@ const SolutionSchema = z.object({
   risks: z.array(z.string())
 });
 
-export async function solutionAgent(problem, plan, analysis) {
+export async function solutionAgent(
+  problem,
+  plan,
+  analysis,
+  previousSolution = null,
+  revisionFeedback = ""
+) {
   if (typeof problem !== "string" || !problem.trim()) {
     throw new Error("Solution Agent requires a valid problem.");
   }
@@ -39,6 +45,12 @@ ${JSON.stringify(plan)}
 ANALYST OUTPUT:
 ${JSON.stringify(analysis)}
 
+PREVIOUS SOLUTION:
+${JSON.stringify(previousSolution)}
+
+REVIEWER FEEDBACK:
+${revisionFeedback || "No previous review. Generate the initial solution."}
+
 Requirements:
 - Distinguish confirmed facts from hypotheses.
 - Do not claim that unverified causes are confirmed.
@@ -48,6 +60,10 @@ Requirements:
 - Explain how to validate performance improvements.
 - Return valid JSON only, without Markdown fences.
 - Keep the response concise enough to fit the output limit.
+- If a previous solution exists, improve it using the Reviewer feedback.
+- Address each required improvement where practical.
+- Preserve useful parts of the previous solution.
+- Do not claim an improvement was tested unless it actually was.
 
 Return this JSON structure:
 {

@@ -23,15 +23,22 @@ async function analystNode(state) {
 }
 
 async function solutionNode(state) {
-  console.log("\n[Graph] Running Solution Node...");
+  console.log(
+    `\n[Graph] Running Solution Node (attempt ${(state.revisionCount ?? 0) + 1})...`
+  );
 
   const solution = await solutionAgent(
     state.problem,
     state.plan,
-    state.analysis
+    state.analysis,
+    state.solution ?? null,
+    state.revisionFeedback ?? ""
   );
 
-  return { solution };
+  return {
+    solution,
+    revisionCount: (state.revisionCount ?? 0) + 1
+  };
 }
 
 async function reviewerNode(state) {
@@ -44,7 +51,54 @@ async function reviewerNode(state) {
     state.solution
   );
 
-  return { review };
+  // console.log(
+  //   `\n[Graph] Review decision: ${review.approved ? "APPROVED" : "REJECTED"}`
+  // );
+
+  console.log(`\n[Graph] Review decision: ${review.decision.toUpperCase()}`);
+
+  return {
+    review,
+    revisionFeedback: review.feedback
+  };
+}
+
+// function routeAfterReview(state) {
+//   const MAX_ATTEMPTS = 3;
+
+//   if (state.review.approved) {
+//     return "finish";
+//   }
+
+//   if (state.revisionCount >= MAX_ATTEMPTS) {
+//     console.log("\n[Graph] Maximum solution attempts reached.");
+
+//     return "finish";
+//   }
+
+//   return "revise";
+// }
+
+function routeAfterReview(state) {
+  const MAX_ATTEMPTS = 3;
+
+  if (state.review.decision === "approved") {
+    return "finish";
+  }
+
+  if (state.review.decision === "needs_input") {
+    console.log(
+      "\n[Graph] Additional information is required. Stopping revision."
+    );
+    return "finish";
+  }
+
+  if (state.revisionCount >= MAX_ATTEMPTS) {
+    console.log("\n[Graph] Maximum solution attempts reached.");
+    return "finish";
+  }
+
+  return "revise";
 }
 
 export const agentFlow = new StateGraph(AgentFlowState)
@@ -56,5 +110,9 @@ export const agentFlow = new StateGraph(AgentFlowState)
   .addEdge("planner", "analyst")
   .addEdge("analyst", "solution_node")
   .addEdge("solution_node", "reviewer_node")
-  .addEdge("reviewer_node", END)
+  // .addEdge("reviewer_node", END)
+  .addConditionalEdges("reviewer_node", routeAfterReview, {
+    revise: "solution_node",
+    finish: END
+  })
   .compile();
