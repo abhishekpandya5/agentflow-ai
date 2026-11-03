@@ -5,6 +5,7 @@ import { plannerAgent } from "../agents/planner.js";
 import { analystAgent } from "../agents/analyst.js";
 import { solutionAgent } from "../agents/solution.js";
 import { reviewerAgent } from "../agents/reviewer.js";
+import { validatorAgent } from "../agents/validator.js";
 
 async function plannerNode(state) {
   console.log("\n[Graph] Running Planner Node...");
@@ -41,6 +42,18 @@ async function solutionNode(state) {
   };
 }
 
+async function validatorNode(state) {
+  console.log("\n[Graph] Running Validator Node...");
+
+  const validation = validatorAgent(state.solution);
+
+  console.log(`[Graph] Validation: ${validation.valid ? "PASSED" : "FAILED"}`);
+
+  console.log(`[Graph] Issues detected: ${validation.issues.length}`);
+
+  return { validation };
+}
+
 async function reviewerNode(state) {
   console.log("\n[Graph] Running Reviewer Node...");
 
@@ -48,7 +61,8 @@ async function reviewerNode(state) {
     state.problem,
     state.plan,
     state.analysis,
-    state.solution
+    state.solution,
+    state.validation
   );
 
   // console.log(
@@ -105,11 +119,13 @@ export const agentFlow = new StateGraph(AgentFlowState)
   .addNode("planner", plannerNode)
   .addNode("analyst", analystNode)
   .addNode("solution_node", solutionNode)
+  .addNode("validator_node", validatorNode)
   .addNode("reviewer_node", reviewerNode)
   .addEdge(START, "planner")
   .addEdge("planner", "analyst")
   .addEdge("analyst", "solution_node")
-  .addEdge("solution_node", "reviewer_node")
+  .addEdge("solution_node", "validator_node")
+  .addEdge("validator_node", "reviewer_node")
   // .addEdge("reviewer_node", END)
   .addConditionalEdges("reviewer_node", routeAfterReview, {
     revise: "solution_node",

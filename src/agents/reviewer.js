@@ -10,7 +10,13 @@ const ReviewSchema = z.object({
   feedback: z.string()
 });
 
-export async function reviewerAgent(problem, plan, analysis, solution) {
+export async function reviewerAgent(
+  problem,
+  plan,
+  analysis,
+  solution,
+  validation
+) {
   if (!problem?.trim()) {
     throw new Error("Reviewer requires the original problem.");
   }
@@ -46,6 +52,15 @@ ${JSON.stringify(analysis)}
 
 PROPOSED SOLUTION:
 ${JSON.stringify(solution)}
+
+VALIDATOR OUTPUT:
+${JSON.stringify(validation)}
+
+Important:
+- Treat Validator issues as technical evidence requiring investigation.
+- Do not approve a solution while critical validation issues remain unresolved.
+- Distinguish warnings from confirmed issues.
+- Do not assume that passing deterministic checks proves the code is correct.
 
 Review criteria:
 1. Technical correctness.

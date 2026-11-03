@@ -8,6 +8,7 @@ export const AgentFlowState = Annotation.Root({
   review: Annotation(),
   revisionCount: Annotation(),
   revisionFeedback: Annotation(),
+  validation: Annotation()
 });
 
 /**  
