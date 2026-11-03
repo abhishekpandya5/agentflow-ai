@@ -82,18 +82,36 @@ Important rules:
 - Return valid JSON only, without Markdown fences.
 - Keep the response concise.
 
-Decision rules:
+
+DECISION RULES:
 
 1. approved:
-   The solution is sufficiently correct and actionable.
+   - The solution is technically sound and addresses the problem.
+   - Required implementation and validation steps are sufficiently concrete.
+   - No critical issues remain.
 
 2. revise:
-   The solution has identifiable problems that can be
-   addressed using the information already available.
+   - The solution has enough information to be improved.
+   - Missing details can reasonably be supplied using technical knowledge.
+   - The solution contains incomplete, incorrect, or vague implementation steps.
 
 3. needs_input:
-   Essential information is missing and cannot be
-   reasonably inferred from the supplied context.
+   - Essential information is unavailable and cannot reasonably be assumed.
+   - Actual measurements, source code, configuration, logs, or database details are required.
+   - The solution cannot be made reliable without information from the user.
+
+IMPORTANT:
+- Do not request actual measurements as a reason to revise when those measurements have not been provided.
+- You may recommend how the user can collect missing measurements.
+- Do not invent database metrics, query details, or performance results.
+- A solution can be useful even when the root cause has not yet been confirmed.
+- Passing Validator checks does not automatically mean a solution should be approved.
+
+When decision is "approved", issues and requiredImprovements must be empty arrays.
+
+When decision is "revise", provide actionable improvements.
+
+When decision is "needs_input", explain exactly what information is needed from the user.
 
 Do not reject a solution merely because additional
 information could make it more precise.
