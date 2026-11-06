@@ -2,13 +2,13 @@ import readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { agentFlow } from "./graph/workflow.js";
 
-const problem = `
-My React application becomes slow when rendering
-a page containing 1,000 products.
+// const problem = `
+// My React application becomes slow when rendering
+// a page containing 1,000 products.
 
-Help me identify the possible causes and plan
-an investigation and optimization strategy.
-`;
+// Help me identify the possible causes and plan
+// an investigation and optimization strategy.
+// `;
 
 const rl = readline.createInterface({
   input: stdin,
@@ -18,20 +18,29 @@ const rl = readline.createInterface({
 try {
   console.log("\n=== AgentFlow AI ===\n");
 
-  // const problem = await rl.question("Describe your engineering problem:\n> ");
+  const problem = await rl.question("Describe your engineering problem:\n> ");
 
-  // if (!problem.trim()) {
-  //   throw new Error("Please enter a valid engineering problem.");
-  // }
+  if (!problem.trim()) {
+    throw new Error("Please enter a valid engineering problem.");
+  }
 
   console.log("\nEngineering problem:\n");
   console.log(problem);
 
-  const result = await agentFlow.invoke({
-    problem,
-    revisionCount: 0,
-    revisionFeedback: ""
-  });
+  const config = {
+    configurable: {
+      thread_id: "agentflow-session-001"
+    }
+  };
+
+  const result = await agentFlow.invoke(
+    {
+      problem,
+      revisionCount: 0,
+      revisionFeedback: ""
+    },
+    config
+  );
 
   console.log("\n=== PLANNER OUTPUT ===\n");
   console.log(JSON.stringify(result.plan, null, 2));
@@ -70,6 +79,16 @@ try {
   }
 
   console.log("\nLangGraph workflow completed successfully.");
+
+  const savedState = await agentFlow.getState(config);
+
+  console.log("Checkpoint state:");
+  console.log(savedState.values);
+
+  console.log("Checkpoint metadata:");
+  console.log(savedState.metadata);
+
+  console.log("Next node:", savedState.next);
 
   // Keep your existing output-printing code below this point.
   // It should print planner, analyst, solution, review and workflow status.

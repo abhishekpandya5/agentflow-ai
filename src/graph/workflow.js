@@ -7,6 +7,8 @@ import { solutionAgent } from "../agents/solution.js";
 import { reviewerAgent } from "../agents/reviewer.js";
 import { validatorAgent } from "../agents/validator.js";
 
+import { MemorySaver } from "@langchain/langgraph";
+
 async function plannerNode(state) {
   console.log("\n[Graph] Running Planner Node...");
 
@@ -45,7 +47,7 @@ async function solutionNode(state) {
 async function validatorNode(state) {
   console.log("\n[Graph] Running Validator Node...");
 
-  const validation = validatorAgent(state.solution);
+  const validation = validatorAgent(state.problem, state.solution);
 
   console.log(`[Graph] Validation: ${validation.valid ? "PASSED" : "FAILED"}`);
 
@@ -115,6 +117,8 @@ function routeAfterReview(state) {
   return "revise";
 }
 
+const checkpointer = new MemorySaver();
+
 export const agentFlow = new StateGraph(AgentFlowState)
   .addNode("planner", plannerNode)
   .addNode("analyst", analystNode)
@@ -131,4 +135,6 @@ export const agentFlow = new StateGraph(AgentFlowState)
     revise: "solution_node",
     finish: END
   })
-  .compile();
+  .compile({
+    checkpointer
+  });

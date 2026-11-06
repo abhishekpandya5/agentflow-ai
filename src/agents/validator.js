@@ -1,4 +1,8 @@
-export function validatorAgent(solution) {
+export function validatorAgent(problem, solution) {
+  if (typeof problem !== "string" || !problem.trim()) {
+    throw new Error("Validator requires a valid problem description.");
+  }
+
   if (!solution || typeof solution !== "object") {
     throw new Error("Validator requires a valid solution.");
   }
@@ -67,10 +71,83 @@ export function validatorAgent(solution) {
     checks.push("Recognizable virtualization implementation detected.");
   }
 
+  // Check: Detect incorrect react-virtualized API usage
+  if (/useVirtualized/.test(code) && /react-virtualized/.test(code)) {
+    issues.push(
+      "Invalid react-virtualized API: useVirtualized is not an exported API. Use supported components such as List or Grid."
+    );
+  } else if (
+    /react-virtualized/.test(code) &&
+    /\b(List|Grid|AutoSizer)\b/.test(code)
+  ) {
+    checks.push("Recognized react-virtualized API detected.");
+  }
+
+  const domain = classifyProblem(problem);
+
+  if (domain === "frontend") {
+    const hasFrontendCode =
+      /react|jsx|tsx|useState|useMemo|useCallback|document\.|window\./i.test(
+        code
+      );
+
+    const hasBackendCode =
+      /mongoose|mongodb|express\(\)|router\.get|collection\(/i.test(code);
+
+    if (hasBackendCode && !hasFrontendCode) {
+      issues.push(
+        "The problem is frontend-related, but the generated code contains only backend implementation."
+      );
+    } else if (hasFrontendCode) {
+      checks.push("Frontend-related code detected.");
+    } else {
+      warnings.push(
+        "Could not confidently identify frontend implementation in the code example."
+      );
+    }
+  }
+
+  if (domain === "backend") {
+    const hasBackendCode =
+      /mongoose|mongodb|express|router\.|collection\(|findById|findOne|find\(/i.test(
+        code
+      );
+
+    const hasFrontendCode = /jsx|useState|useEffect|useMemo|useCallback/i.test(
+      code
+    );
+
+    if (hasFrontendCode && !hasBackendCode) {
+      issues.push(
+        "The problem is backend-related, but the generated code contains only frontend implementation."
+      );
+    } else if (hasBackendCode) {
+      checks.push("Backend-related code detected.");
+    } else {
+      warnings.push(
+        "Could not confidently identify backend implementation in the code example."
+      );
+    }
+  }
+
   return {
     valid: issues.length === 0,
     issues,
     warnings,
     checks
   };
+}
+
+function classifyProblem(problem) {
+  const text = problem.toLowerCase();
+
+  if (/react|frontend|component|rendering|dom/.test(text)) {
+    return "frontend";
+  }
+
+  if (/mongodb|database|sql|redis|node\.js|express|backend|api/.test(text)) {
+    return "backend";
+  }
+
+  return "general";
 }

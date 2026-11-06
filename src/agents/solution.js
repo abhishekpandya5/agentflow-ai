@@ -51,25 +51,31 @@ ${JSON.stringify(previousSolution)}
 REVIEWER FEEDBACK:
 ${revisionFeedback || "No previous review. Generate the initial solution."}
 
+
 Requirements:
+- Identify the primary technology and domain from the engineering problem.
+- Generate code relevant to the actual engineering problem.
+- Do not default to React or frontend code.
+- For backend problems, use relevant backend technologies such as Node.js, Express, MongoDB, SQL, or Redis.
+- For frontend problems, use relevant frontend technologies such as React, JavaScript, TypeScript, HTML, or CSS.
+- If the problem does not provide enough information to write meaningful code, provide a concise illustrative example and clearly state its assumptions.
 - Distinguish confirmed facts from hypotheses.
-- Do not claim that unverified causes are confirmed.
+- Do not claim unverified causes are confirmed.
 - Give actionable implementation steps.
-- Include a concise React JavaScript code example.
-- Consider list virtualization where appropriate.
 - Explain how to validate performance improvements.
 - Return valid JSON only, without Markdown fences.
 - Keep the response concise enough to fit the output limit.
-- If a previous solution exists, improve it using the Reviewer feedback.
+- If a previous solution exists, improve it using Reviewer feedback.
 - Address each required improvement where practical.
 - Preserve useful parts of the previous solution.
 - Do not claim an improvement was tested unless it actually was.
+
 
 Return this JSON structure:
 {
   "approach": "Overall solution strategy",
   "implementationSteps": ["Step 1", "Step 2"],
-  "codeExample": "React JavaScript code as a string",
+  "codeExample": "Relevant code example for the engineering problem as a string",
   "validationSteps": ["Validation step 1"],
   "risks": ["Potential risk"]
 }
